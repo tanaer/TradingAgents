@@ -160,6 +160,20 @@ def select_shallow_thinking_agent(provider) -> str:
             ("GPT-OSS:latest (20B, local)", "gpt-oss:latest"),
             ("GLM-4.7-Flash:latest (30B, local)", "glm-4.7-flash:latest"),
         ],
+        "zhipu": [
+            ("GLM-4-Flash - Fast, free tier", "glm-4-flash"),
+            ("GLM-4-FlashX - Enhanced fast", "glm-4-flashx"),
+            ("GLM-4-Air - Balanced", "glm-4-air"),
+            ("GLM-4-AirX - Enhanced balanced", "glm-4-airx"),
+        ],
+        "minimax": [
+            ("abab5.5s-chat - Fast responses", "abab5.5s-chat"),
+            ("abab5.5-chat - Standard", "abab5.5-chat"),
+            ("abab6.5s-chat - Advanced fast", "abab6.5s-chat"),
+        ],
+        "newapi": [
+            ("Custom model - Enter in config", "gpt-4o-mini"),
+        ],
     }
 
     choice = questionary.select(
@@ -228,6 +242,21 @@ def select_deep_thinking_agent(provider) -> str:
             ("GPT-OSS:latest (20B, local)", "gpt-oss:latest"),
             ("Qwen3:latest (8B, local)", "qwen3:latest"),
         ],
+        "zhipu": [
+            ("GLM-4-Plus - Most capable", "glm-4-plus"),
+            ("GLM-4-0520 - High-performance", "glm-4-0520"),
+            ("GLM-4 - Standard", "glm-4"),
+            ("GLM-4-Long - Long context", "glm-4-long"),
+        ],
+        "minimax": [
+            ("abab6.5g-chat - Most capable", "abab6.5g-chat"),
+            ("abab6.5s-chat - Advanced", "abab6.5s-chat"),
+            ("abab6.5t-chat - Balanced", "abab6.5t-chat"),
+            ("minimax-01 - Latest", "minimax-01"),
+        ],
+        "newapi": [
+            ("Custom model - Enter in config", "gpt-4o"),
+        ],
     }
 
     choice = questionary.select(
@@ -262,6 +291,9 @@ def select_llm_provider() -> tuple[str, str]:
         ("xAI", "https://api.x.ai/v1"),
         ("Openrouter", "https://openrouter.ai/api/v1"),
         ("Ollama", "http://localhost:11434/v1"),
+        ("Zhipu AI (智谱)", "https://open.bigmodel.cn/api/paas/v4/"),
+        ("MiniMax", "https://api.minimax.chat/v1"),
+        ("NewAPI (自定义)", ""),  # Requires user input
     ]
     
     choice = questionary.select(

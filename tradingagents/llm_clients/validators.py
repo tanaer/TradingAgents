@@ -63,17 +63,44 @@ VALID_MODELS = {
         "grok-4-fast-reasoning",
         "grok-4-fast-non-reasoning",
     ],
+    "zhipu": [
+        # GLM-4 series
+        "glm-4-plus",
+        "glm-4-0520",
+        "glm-4",
+        "glm-4-air",
+        "glm-4-airx",
+        "glm-4-long",
+        "glm-4-flash",
+        "glm-4-flashx",
+        # GLM-4V vision series
+        "glm-4v",
+        "glm-4v-plus",
+        "glm-4v-flash",
+    ],
+    "minimax": [
+        # MiniMax series
+        "abab6.5s-chat",
+        "abab6.5g-chat",
+        "abab6.5t-chat",
+        "abab5.5-chat",
+        "abab5.5s-chat",
+        "abab5.5t-chat",
+        # MiniMax-01 series
+        "minimax-01",
+        "minimax-text-01",
+    ],
 }
 
 
 def validate_model(provider: str, model: str) -> bool:
     """Check if model name is valid for the given provider.
 
-    For ollama, openrouter - any model is accepted.
+    For ollama, openrouter, newapi - any model is accepted.
     """
     provider_lower = provider.lower()
 
-    if provider_lower in ("ollama", "openrouter"):
+    if provider_lower in ("ollama", "openrouter", "newapi"):
         return True
 
     if provider_lower not in VALID_MODELS:

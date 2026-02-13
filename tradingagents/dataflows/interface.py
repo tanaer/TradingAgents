@@ -24,6 +24,22 @@ from .alpha_vantage import (
 )
 from .alpha_vantage_common import AlphaVantageRateLimitError
 
+# Import Chinese market data providers
+from .akshare_provider import (
+    get_cn_stock_data,
+    get_cn_stock_info,
+    get_cn_stock_fundamentals,
+    search_cn_stocks,
+    get_cn_stock_realtime,
+)
+from .eastmoney_provider import (
+    get_cn_stock_news,
+    get_cn_market_news,
+    get_cn_stock_notices,
+    get_cn_stock_research_reports,
+    get_cn_stock_sentiment,
+)
+
 # Configuration and routing logic
 from .config import get_config
 
@@ -63,6 +79,8 @@ TOOLS_CATEGORIES = {
 VENDOR_LIST = [
     "yfinance",
     "alpha_vantage",
+    "akshare",
+    "eastmoney",
 ]
 
 # Mapping of methods to their vendor-specific implementations
@@ -71,6 +89,7 @@ VENDOR_METHODS = {
     "get_stock_data": {
         "alpha_vantage": get_alpha_vantage_stock,
         "yfinance": get_YFin_data_online,
+        "akshare": get_cn_stock_data,
     },
     # technical_indicators
     "get_indicators": {
@@ -81,6 +100,7 @@ VENDOR_METHODS = {
     "get_fundamentals": {
         "alpha_vantage": get_alpha_vantage_fundamentals,
         "yfinance": get_yfinance_fundamentals,
+        "akshare": get_cn_stock_fundamentals,
     },
     "get_balance_sheet": {
         "alpha_vantage": get_alpha_vantage_balance_sheet,
@@ -98,10 +118,12 @@ VENDOR_METHODS = {
     "get_news": {
         "alpha_vantage": get_alpha_vantage_news,
         "yfinance": get_news_yfinance,
+        "eastmoney": get_cn_stock_news,
     },
     "get_global_news": {
         "yfinance": get_global_news_yfinance,
         "alpha_vantage": get_alpha_vantage_global_news,
+        "eastmoney": get_cn_market_news,
     },
     "get_insider_transactions": {
         "alpha_vantage": get_alpha_vantage_insider_transactions,

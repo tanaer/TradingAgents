@@ -58,6 +58,24 @@ class OpenAIClient(BaseLLMClient):
         elif self.provider == "ollama":
             llm_kwargs["base_url"] = "http://localhost:11434/v1"
             llm_kwargs["api_key"] = "ollama"  # Ollama doesn't require auth
+        elif self.provider == "zhipu":
+            # Zhipu AI (智谱) - use provided base_url or default
+            llm_kwargs["base_url"] = self.base_url or "https://open.bigmodel.cn/api/paas/v4/"
+            api_key = os.environ.get("ZHIPU_API_KEY")
+            if api_key:
+                llm_kwargs["api_key"] = api_key
+        elif self.provider == "minimax":
+            # MiniMax - use provided base_url or default
+            llm_kwargs["base_url"] = self.base_url or "https://api.minimax.chat/v1"
+            api_key = os.environ.get("MINIMAX_API_KEY")
+            if api_key:
+                llm_kwargs["api_key"] = api_key
+        elif self.provider == "newapi":
+            # NewAPI - custom endpoint (base_url is required)
+            llm_kwargs["base_url"] = self.base_url
+            api_key = os.environ.get("NEWAPI_API_KEY")
+            if api_key:
+                llm_kwargs["api_key"] = api_key
         elif self.base_url:
             llm_kwargs["base_url"] = self.base_url
 

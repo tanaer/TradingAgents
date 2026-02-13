@@ -15,7 +15,8 @@ def create_llm_client(
     """Create an LLM client for the specified provider.
 
     Args:
-        provider: LLM provider (openai, anthropic, google, xai, ollama, openrouter)
+        provider: LLM provider (openai, anthropic, google, xai, ollama, openrouter,
+                  zhipu, minimax, newapi)
         model: Model name/identifier
         base_url: Optional base URL for API endpoint
         **kwargs: Additional provider-specific arguments
@@ -33,6 +34,30 @@ def create_llm_client(
 
     if provider_lower == "xai":
         return OpenAIClient(model, base_url, provider="xai", **kwargs)
+
+    # Zhipu AI (智谱) - OpenAI-compatible API
+    if provider_lower == "zhipu":
+        return OpenAIClient(
+            model,
+            base_url or "https://open.bigmodel.cn/api/paas/v4/",
+            provider="zhipu",
+            **kwargs,
+        )
+
+    # MiniMax - OpenAI-compatible API
+    if provider_lower == "minimax":
+        return OpenAIClient(
+            model,
+            base_url or "https://api.minimax.chat/v1",
+            provider="minimax",
+            **kwargs,
+        )
+
+    # NewAPI - Custom OpenAI-compatible API (requires base_url)
+    if provider_lower == "newapi":
+        if not base_url:
+            raise ValueError("newapi provider requires base_url to be configured")
+        return OpenAIClient(model, base_url, provider="newapi", **kwargs)
 
     if provider_lower == "anthropic":
         return AnthropicClient(model, base_url, **kwargs)
