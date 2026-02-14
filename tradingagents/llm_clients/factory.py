@@ -65,4 +65,9 @@ def create_llm_client(
     if provider_lower == "google":
         return GoogleClient(model, base_url, **kwargs)
 
-    raise ValueError(f"Unsupported LLM provider: {provider}")
+    # Handle any unknown provider as OpenAI-compatible (for custom providers)
+    # This allows custom OpenAI-compatible APIs to work
+    if base_url:
+        return OpenAIClient(model, base_url, provider=provider_lower, **kwargs)
+
+    raise ValueError(f"Unsupported LLM provider: {provider}. For custom providers, provide a base_url.")

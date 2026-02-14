@@ -392,6 +392,7 @@ async def test_provider(request: ProviderTestRequest) -> ProviderTestResponse:
 
         base_url = None
         provider_type = request.provider_id
+        api_key = None
 
         # Handle custom provider instances
         if request.provider_id.startswith("custom:"):
@@ -404,9 +405,7 @@ async def test_provider(request: ProviderTestRequest) -> ProviderTestResponse:
             instance = configs["custom_providers"][instance_id]
             base_url = instance["base_url"]
             provider_type = instance["provider_type"]
-
-            # Temporarily set API key
-            os.environ[f"CUSTOM_API_KEY_{instance_id}"] = instance["api_key"]
+            api_key = instance["api_key"]
 
         elif request.provider_id == "newapi":
             base_url = os.environ.get("NEWAPI_BASE_URL")
@@ -418,10 +417,16 @@ async def test_provider(request: ProviderTestRequest) -> ProviderTestResponse:
 
         start_time = time.time()
 
+        # Build kwargs for client creation
+        client_kwargs = {}
+        if api_key:
+            client_kwargs["api_key"] = api_key
+
         client = create_llm_client(
             provider=provider_type,
             model=request.model,
             base_url=base_url,
+            **client_kwargs,
         )
 
         llm = client.get_llm()
