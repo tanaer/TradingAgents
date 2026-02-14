@@ -5,23 +5,73 @@ export interface ProviderInfo {
   base_url: string | null
   models: string[]
   is_configured: boolean
+  supports_custom_models: boolean
+}
+
+export interface ProviderWithCustomModels {
+  id: string
+  name: string
+  base_url: string | null
+  default_models: string[]
+  custom_models: string[]
+  all_models: string[]
+  is_configured: boolean
+  supports_custom_models: boolean
 }
 
 export interface ProviderConfig {
   provider_id: string
   api_key: string
   base_url?: string
+  models?: string[]
 }
 
 export interface ProviderTestRequest {
   provider_id: string
   model: string
+  instance_id?: string
 }
 
 export interface ProviderTestResponse {
   success: boolean
   message: string
   latency_ms?: number
+}
+
+// Custom Provider Instance types
+export interface CustomProviderInstance {
+  instance_id: string
+  name: string
+  provider_type: string
+  base_url: string
+  api_key: string
+  models: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateCustomProviderRequest {
+  name: string
+  provider_type?: string
+  base_url: string
+  api_key: string
+  models?: string[]
+}
+
+export interface UpdateCustomProviderRequest {
+  name?: string
+  base_url?: string
+  api_key?: string
+  models?: string[]
+}
+
+export interface CopyProviderConfigRequest {
+  source_instance_id: string
+  new_name: string
+}
+
+export interface AddModelRequest {
+  model_name: string
 }
 
 // Analysis types

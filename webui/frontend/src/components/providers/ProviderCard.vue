@@ -1,8 +1,11 @@
 <template>
-  <el-card class="provider-card" :class="{ configured: provider.is_configured }">
+  <el-card class="provider-card" :class="{ configured: provider.is_configured, custom: isCustom }">
     <template #header>
       <div class="card-header">
-        <span class="provider-name">{{ provider.name }}</span>
+        <div class="title-section">
+          <span class="provider-name">{{ provider.name }}</span>
+          <el-tag v-if="isCustom" type="warning" size="small">Custom</el-tag>
+        </div>
         <el-tag :type="provider.is_configured ? 'success' : 'info'" size="small">
           {{ provider.is_configured ? 'Configured' : 'Not Configured' }}
         </el-tag>
@@ -24,9 +27,54 @@
       </div>
     </div>
 
+    <!-- Models List with Add/Remove -->
+    <div class="models-section">
+      <div class="models-header">
+        <span>Models</span>
+        <el-button size="small" @click="showAddModel = true">
+          <el-icon><Plus /></el-icon>
+          Add Model
+        </el-button>
+      </div>
+      <div class="models-list">
+        <el-tag
+          v-for="model in displayModels"
+          :key="model"
+          closable
+          @close="handleRemoveModel(model)"
+          class="model-tag"
+        >
+          {{ model }}
+        </el-tag>
+        <el-button
+          v-if="provider.models.length > maxDisplayModels"
+          link
+          size="small"
+          @click="showAllModels = !showAllModels"
+        >
+          {{ showAllModels ? 'Show less' : `+${provider.models.length - maxDisplayModels} more` }}
+        </el-button>
+      </div>
+    </div>
+
+    <!-- Add Model Dialog -->
+    <el-dialog v-model="showAddModel" title="Add Custom Model" width="400px">
+      <el-input
+        v-model="newModelName"
+        placeholder="Enter model name (e.g., gpt-4o, claude-3-opus)"
+        @keyup.enter="handleAddModel"
+      />
+      <template #footer>
+        <el-button @click="showAddModel = false">Cancel</el-button>
+        <el-button type="primary" @click="handleAddModel" :disabled="!newModelName.trim()">
+          Add Model
+        </el-button>
+      </template>
+    </el-dialog>
+
     <div class="provider-actions">
       <el-button size="small" @click="$emit('configure', provider)">
-        {{ provider.is_configured ? 'Reconfigure' : 'Configure' }}
+        {{ provider.is_configured ? 'Edit' : 'Configure' }}
       </el-button>
       <el-button
         size="small"
@@ -34,23 +82,70 @@
         :disabled="!provider.is_configured"
         @click="$emit('test', provider)"
       >
-        Test Connection
+        Test
+      </el-button>
+      <el-button
+        v-if="isCustom"
+        size="small"
+        @click="$emit('copy', provider)"
+      >
+        <el-icon><CopyDocument /></el-icon>
+        Copy
+      </el-button>
+      <el-button
+        v-if="isCustom"
+        size="small"
+        type="danger"
+        @click="$emit('delete', provider)"
+      >
+        <el-icon><Delete /></el-icon>
       </el-button>
     </div>
   </el-card>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { Plus, CopyDocument, Delete } from '@element-plus/icons-vue'
 import type { ProviderInfo } from '@/types'
 
-defineProps<{
+const props = defineProps<{
   provider: ProviderInfo
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   configure: [provider: ProviderInfo]
   test: [provider: ProviderInfo]
+  copy: [provider: ProviderInfo]
+  delete: [provider: ProviderInfo]
+  addModel: [providerId: string, modelName: string]
+  removeModel: [providerId: string, modelName: string]
 }>()
+
+const isCustom = computed(() => props.provider.id.startsWith('custom:'))
+const maxDisplayModels = 5
+const showAllModels = ref(false)
+const showAddModel = ref(false)
+const newModelName = ref('')
+
+const displayModels = computed(() => {
+  if (showAllModels.value || props.provider.models.length <= maxDisplayModels) {
+    return props.provider.models
+  }
+  return props.provider.models.slice(0, maxDisplayModels)
+})
+
+function handleAddModel() {
+  if (newModelName.value.trim()) {
+    emit('addModel', props.provider.id, newModelName.value.trim())
+    newModelName.value = ''
+    showAddModel.value = false
+  }
+}
+
+function handleRemoveModel(model: string) {
+  emit('removeModel', props.provider.id, model)
+}
 </script>
 
 <style scoped>
@@ -62,10 +157,20 @@ defineEmits<{
   border-left: 3px solid #67c23a;
 }
 
+.provider-card.custom {
+  border-left: 3px solid #e6a23c;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .provider-name {
@@ -97,8 +202,36 @@ defineEmits<{
   word-break: break-all;
 }
 
+.models-section {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.models-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.models-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.model-tag {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .provider-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 </style>
