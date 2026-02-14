@@ -199,4 +199,52 @@ function getAgentProgressStatus(status: string) {
   margin-top: 16px;
   text-align: center;
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .tracker-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .agents-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .agent-card {
+    padding: 10px;
+  }
+
+  .agent-header {
+    gap: 6px;
+  }
+
+  .agent-name {
+    font-size: 14px;
+  }
+
+  .agent-message {
+    font-size: 11px;
+  }
+
+  .overall-progress :deep(.el-progress__text) {
+    font-size: 12px !important;
+  }
+
+  .tracker-actions .el-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+
+  :deep(.el-card__body) {
+    padding: 12px 15px;
+  }
+}
 </style>

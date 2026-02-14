@@ -3,6 +3,7 @@
     v-model="visible"
     title="Create Custom Provider"
     width="500px"
+    class="custom-provider-dialog"
   >
     <el-form :model="form" label-width="100px">
       <el-form-item label="Name" required>
@@ -152,5 +153,39 @@ watch(visible, (val) => {
   font-size: 12px;
   color: #909399;
   margin-top: 4px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  :deep(.el-dialog) {
+    width: 95% !important;
+    margin: 5vh auto !important;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 15px;
+  }
+
+  :deep(.el-form-item__label) {
+    padding-bottom: 4px;
+  }
+
+  :deep(.el-select) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-dialog__header) {
+    padding: 12px 15px;
+  }
+
+  :deep(.el-dialog__footer) {
+    padding: 10px 15px;
+  }
+
+  :deep(.el-button) {
+    padding: 8px 12px;
+  }
 }
 </style>

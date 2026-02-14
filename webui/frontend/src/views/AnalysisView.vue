@@ -89,4 +89,32 @@ onUnmounted(() => {
 .analysis-view {
   padding: 0;
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  :deep(.el-col-10),
+  :deep(.el-col-14) {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+
+  :deep(.el-row) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  :deep(.el-col) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-bottom: 15px;
+  }
+
+  :deep(.el-card__header) {
+    padding: 12px 15px;
+  }
+
+  :deep(.el-card__body) {
+    padding: 15px;
+  }
+}
 </style>

@@ -234,4 +234,64 @@ function handleRemoveModel(model: string) {
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .provider-name {
+    font-size: 14px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .label {
+    width: auto;
+  }
+
+  .models-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .models-section {
+    padding: 10px;
+  }
+
+  .model-tag {
+    max-width: 120px;
+    font-size: 12px;
+  }
+
+  .provider-actions {
+    flex-direction: column;
+  }
+
+  .provider-actions .el-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .provider-card :deep(.el-card__body) {
+    padding: 12px;
+  }
+
+  .provider-card :deep(.el-card__header) {
+    padding: 12px;
+  }
+
+  .model-tag {
+    max-width: 100px;
+  }
+}
 </style>

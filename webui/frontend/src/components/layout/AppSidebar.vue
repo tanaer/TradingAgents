@@ -6,6 +6,7 @@
     text-color="#bfcbd9"
     active-text-color="#409EFF"
     router
+    @select="handleSelect"
   >
     <el-menu-item index="/">
       <el-icon><HomeFilled /></el-icon>
@@ -33,8 +34,16 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+const emit = defineEmits<{
+  select: []
+}>()
+
 const route = useRoute()
 const activeMenu = computed(() => route.path)
+
+function handleSelect() {
+  emit('select')
+}
 </script>
 
 <style scoped>
@@ -54,5 +63,13 @@ const activeMenu = computed(() => route.path)
 
 .el-menu-item.is-active {
   background-color: #263445 !important;
+}
+
+/* Mobile: larger touch targets */
+@media (max-width: 768px) {
+  .el-menu-item {
+    height: 56px;
+    line-height: 56px;
+  }
 }
 </style>

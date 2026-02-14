@@ -1,11 +1,11 @@
 <template>
-  <el-form :model="form" label-width="140px" class="analysis-form">
+  <el-form :model="form" label-width="120px" class="analysis-form" label-position="top">
     <el-collapse v-model="activeCollapse">
       <!-- Basic Settings -->
       <el-collapse-item title="Basic Settings" name="basic">
         <!-- Market Selection -->
         <el-form-item label="Market">
-          <el-radio-group v-model="form.market">
+          <el-radio-group v-model="form.market" class="market-radio">
             <el-radio-button label="us">US</el-radio-button>
             <el-radio-button label="hk">HK</el-radio-button>
             <el-radio-button label="cn">A-Share</el-radio-button>
@@ -46,7 +46,7 @@
 
         <!-- Analyst Selection -->
         <el-form-item label="Analysts">
-          <el-checkbox-group v-model="form.analysts">
+          <el-checkbox-group v-model="form.analysts" class="analyst-checkbox">
             <el-checkbox v-for="analyst in availableAnalysts" :key="analyst.id" :label="analyst.id">
               {{ analyst.name }}
             </el-checkbox>
@@ -61,10 +61,10 @@
       <!-- Research Depth Settings -->
       <el-collapse-item title="Research Depth" name="depth">
         <el-form-item label="Depth Preset">
-          <el-radio-group v-model="depthPreset" @change="applyDepthPreset">
-            <el-radio-button label="shallow">Shallow (Quick)</el-radio-button>
-            <el-radio-button label="medium">Medium (Balanced)</el-radio-button>
-            <el-radio-button label="deep">Deep (Comprehensive)</el-radio-button>
+          <el-radio-group v-model="depthPreset" @change="applyDepthPreset" class="depth-radio">
+            <el-radio-button label="shallow">Shallow</el-radio-button>
+            <el-radio-button label="medium">Medium</el-radio-button>
+            <el-radio-button label="deep">Deep</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
@@ -80,20 +80,24 @@
 
         <!-- Agent Swarm Toggles -->
         <el-form-item label="Bull/Bear Debate">
-          <el-switch v-model="form.enable_bull_bear_debate" />
-          <span class="switch-label">Enable researcher debate</span>
+          <div class="switch-row">
+            <el-switch v-model="form.enable_bull_bear_debate" />
+            <span class="switch-label">Enable researcher debate</span>
+          </div>
         </el-form-item>
 
         <el-form-item label="Risk Analysis">
-          <el-switch v-model="form.enable_risk_analysis" />
-          <span class="switch-label">Enable risk debators</span>
+          <div class="switch-row">
+            <el-switch v-model="form.enable_risk_analysis" />
+            <span class="switch-label">Enable risk debators</span>
+          </div>
         </el-form-item>
       </el-collapse-item>
 
       <!-- LLM Configuration -->
       <el-collapse-item title="LLM Configuration" name="llm">
         <el-form-item label="LLM Provider">
-          <el-select v-model="form.llm_provider" placeholder="Select provider" @change="handleProviderChange">
+          <el-select v-model="form.llm_provider" placeholder="Select provider" @change="handleProviderChange" style="width: 100%">
             <el-option-group label="Configured Providers">
               <el-option
                 v-for="provider in configuredProviders"
@@ -106,7 +110,7 @@
         </el-form-item>
 
         <el-form-item label="Quick Model">
-          <el-select v-model="form.shallow_model" placeholder="Select quick thinking model" filterable allow-create>
+          <el-select v-model="form.shallow_model" placeholder="Select quick thinking model" filterable allow-create style="width: 100%">
             <el-option
               v-for="model in availableModels"
               :key="model"
@@ -117,7 +121,7 @@
         </el-form-item>
 
         <el-form-item label="Deep Model">
-          <el-select v-model="form.deep_model" placeholder="Select deep thinking model" filterable allow-create>
+          <el-select v-model="form.deep_model" placeholder="Select deep thinking model" filterable allow-create style="width: 100%">
             <el-option
               v-for="model in availableModels"
               :key="model"
@@ -135,14 +139,14 @@
       <!-- Advanced Settings -->
       <el-collapse-item title="Advanced Settings" name="advanced">
         <el-form-item label="Data Vendor">
-          <el-select v-model="form.data_vendor">
+          <el-select v-model="form.data_vendor" style="width: 100%">
             <el-option label="Yahoo Finance" value="yfinance" />
             <el-option label="Alpha Vantage" value="alpha_vantage" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="OpenAI Reasoning" v-if="form.llm_provider === 'openai'">
-          <el-select v-model="form.openai_reasoning_effort" clearable>
+          <el-select v-model="form.openai_reasoning_effort" clearable style="width: 100%">
             <el-option label="Low" value="low" />
             <el-option label="Medium" value="medium" />
             <el-option label="High" value="high" />
@@ -150,7 +154,7 @@
         </el-form-item>
 
         <el-form-item label="Google Thinking" v-if="form.llm_provider === 'google'">
-          <el-select v-model="form.google_thinking_level" clearable>
+          <el-select v-model="form.google_thinking_level" clearable style="width: 100%">
             <el-option label="Minimal" value="minimal" />
             <el-option label="High" value="high" />
           </el-select>
@@ -162,7 +166,7 @@
     <el-alert
       type="info"
       :closable="false"
-      style="margin: 16px 0"
+      class="swarm-alert"
     >
       <template #title>
         <strong>Agent Swarm Architecture</strong>
@@ -176,7 +180,7 @@
       </div>
     </el-alert>
 
-    <el-form-item>
+    <el-form-item class="submit-btn">
       <el-button
         type="primary"
         size="large"
@@ -357,7 +361,7 @@ onMounted(() => {
 
 .stock-suggestion .symbol {
   font-weight: bold;
-  min-width: 100px;
+  min-width: 80px;
 }
 
 .stock-suggestion .name {
@@ -374,9 +378,18 @@ onMounted(() => {
   gap: 4px;
 }
 
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .switch-label {
-  margin-left: 10px;
   color: #606266;
+}
+
+.swarm-alert {
+  margin: 16px 0;
 }
 
 .swarm-info {
@@ -388,6 +401,10 @@ onMounted(() => {
   margin: 4px 0;
 }
 
+.submit-btn {
+  margin-top: 16px;
+}
+
 :deep(.el-collapse-item__header) {
   font-weight: bold;
   font-size: 14px;
@@ -395,5 +412,80 @@ onMounted(() => {
 
 :deep(.el-slider__runway.show-input) {
   margin-right: 80px;
+}
+
+:deep(.el-form-item__label) {
+  padding-bottom: 4px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .analysis-form {
+    max-width: 100%;
+  }
+
+  .stock-suggestion {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .stock-suggestion .symbol {
+    min-width: auto;
+  }
+
+  .stock-suggestion .name {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .market-radio,
+  .depth-radio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .market-radio .el-radio-button,
+  .depth-radio .el-radio-button {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .analyst-checkbox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .swarm-info {
+    font-size: 12px;
+  }
+
+  :deep(.el-slider__runway.show-input) {
+    margin-right: 70px;
+  }
+
+  :deep(.el-slider__input) {
+    width: 60px;
+  }
+
+  .switch-label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-collapse-item__header) {
+    font-size: 13px;
+    padding: 0 10px;
+  }
+
+  :deep(.el-collapse-item__content) {
+    padding: 10px;
+  }
+
+  .form-tip {
+    font-size: 11px;
+  }
 }
 </style>

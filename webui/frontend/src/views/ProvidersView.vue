@@ -194,4 +194,65 @@ onMounted(() => {
   font-size: 18px;
   font-weight: bold;
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 16px;
+  }
+
+  :deep(.el-page-header__extra) {
+    margin-top: 10px;
+  }
+
+  :deep(.el-page-header__extra .el-button) {
+    padding: 8px 12px;
+  }
+
+  :deep(.el-page-header__extra .el-button span:not(.el-icon)) {
+    display: none;
+  }
+
+  :deep(.el-alert) {
+    margin: 15px 0 !important;
+  }
+
+  :deep(.el-alert__description) {
+    display: none;
+  }
+
+  :deep(.el-tabs__item) {
+    font-size: 14px;
+    padding: 0 12px;
+  }
+
+  :deep(.el-col-12) {
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+
+  :deep(.el-row) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  :deep(.el-col) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-page-header__left) {
+    display: none;
+  }
+
+  :deep(.el-page-header__main) {
+    padding-left: 0;
+  }
+
+  :deep(.el-tabs__header) {
+    margin-bottom: 10px;
+  }
+}
 </style>
