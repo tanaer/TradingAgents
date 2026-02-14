@@ -4,6 +4,12 @@ from fastapi import APIRouter, HTTPException, Query
 
 from ..config import MARKET_CONFIG
 from ..schemas.market import MarketInfo, StockSearchResult, PopularStock
+from .stock_search import (
+    search_all_markets,
+    scan_popular_us_stocks,
+    scan_popular_hk_stocks,
+    scan_popular_cn_stocks,
+)
 
 router = APIRouter()
 
@@ -27,159 +33,89 @@ async def list_markets() -> list[MarketInfo]:
 async def search_stocks(
     query: str = Query(..., min_length=1, description="Search query"),
     market: str | None = Query(None, description="Filter by market (us/hk/cn)"),
-    limit: int = Query(10, ge=1, le=50, description="Max results"),
+    limit: int = Query(20, ge=1, le=100, description="Max results"),
 ) -> list[StockSearchResult]:
-    """Search for stocks by symbol or name."""
-    results = []
+    """Search for stocks by symbol or name across all markets.
 
-    query_lower = query.lower()
+    Uses real-time data from:
+    - US/HK: yfinance
+    - CN (A-share): akshare
+    """
+    results = await search_all_markets(query, market, limit)
 
-    # Search in different markets
-    markets_to_search = [market] if market else list(MARKET_CONFIG.keys())
-
-    for market_id in markets_to_search:
-        if market_id not in MARKET_CONFIG:
-            continue
-
-        try:
-            if market_id == "us":
-                results.extend(_search_us_stocks(query_lower, limit))
-            elif market_id == "hk":
-                results.extend(_search_hk_stocks(query_lower, limit))
-            elif market_id == "cn":
-                results.extend(_search_cn_stocks(query_lower, limit))
-        except Exception:
-            # Log error but continue with other markets
-            pass
-
-    return results[:limit]
+    return [
+        StockSearchResult(
+            symbol=r["symbol"],
+            name=r["name"],
+            market=r["market"],
+            exchange=r.get("exchange"),
+        )
+        for r in results
+    ]
 
 
 @router.get("/{market}/popular", response_model=list[PopularStock])
 async def get_popular_stocks(market: str) -> list[PopularStock]:
-    """Get popular stocks for a specific market."""
+    """Get popular/most active stocks for a specific market.
+
+    For CN market, returns real-time most active stocks by trading volume.
+    """
     if market not in MARKET_CONFIG:
         raise HTTPException(status_code=404, detail=f"Market '{market}' not found")
 
-    # Return predefined popular stocks for each market
-    popular_stocks = {
-        "us": [
-            PopularStock(symbol="AAPL", name="Apple Inc.", market="us"),
-            PopularStock(symbol="MSFT", name="Microsoft Corporation", market="us"),
-            PopularStock(symbol="GOOGL", name="Alphabet Inc.", market="us"),
-            PopularStock(symbol="AMZN", name="Amazon.com Inc.", market="us"),
-            PopularStock(symbol="NVDA", name="NVIDIA Corporation", market="us"),
-            PopularStock(symbol="TSLA", name="Tesla Inc.", market="us"),
-            PopularStock(symbol="META", name="Meta Platforms Inc.", market="us"),
-            PopularStock(symbol="BRK.B", name="Berkshire Hathaway", market="us"),
-        ],
-        "hk": [
-            PopularStock(symbol="0700.HK", name="腾讯控股", market="hk"),
-            PopularStock(symbol="9988.HK", name="阿里巴巴", market="hk"),
-            PopularStock(symbol="3690.HK", name="美团", market="hk"),
-            PopularStock(symbol="1810.HK", name="小米集团", market="hk"),
-            PopularStock(symbol="2318.HK", name="中国平安", market="hk"),
-            PopularStock(symbol="0005.HK", name="汇丰控股", market="hk"),
-            PopularStock(symbol="1299.HK", name="友邦保险", market="hk"),
-            PopularStock(symbol="0941.HK", name="中国移动", market="hk"),
-        ],
-        "cn": [
-            PopularStock(symbol="600519.SH", name="贵州茅台", market="cn"),
-            PopularStock(symbol="000858.SZ", name="五粮液", market="cn"),
-            PopularStock(symbol="601318.SH", name="中国平安", market="cn"),
-            PopularStock(symbol="600036.SH", name="招商银行", market="cn"),
-            PopularStock(symbol="000001.SZ", name="平安银行", market="cn"),
-            PopularStock(symbol="601166.SH", name="兴业银行", market="cn"),
-            PopularStock(symbol="600000.SH", name="浦发银行", market="cn"),
-            PopularStock(symbol="000651.SZ", name="格力电器", market="cn"),
-        ],
-    }
+    if market == "us":
+        stocks = await scan_popular_us_stocks()
+    elif market == "hk":
+        stocks = await scan_popular_hk_stocks()
+    elif market == "cn":
+        stocks = await scan_popular_cn_stocks()
+    else:
+        stocks = []
 
-    return popular_stocks.get(market, [])
+    return [
+        PopularStock(
+            symbol=s["symbol"],
+            name=s["name"],
+            market=s["market"],
+            price=s.get("price"),
+            change_percent=s.get("change_pct"),
+        )
+        for s in stocks
+    ]
 
 
-def _search_us_stocks(query: str, limit: int) -> list[StockSearchResult]:
-    """Search US stocks using yfinance or similar."""
-    # Simplified implementation - in production, use a proper stock API
-    us_stocks = {
-        "aapl": ("AAPL", "Apple Inc."),
-        "msft": ("MSFT", "Microsoft Corporation"),
-        "googl": ("GOOGL", "Alphabet Inc."),
-        "amzn": ("AMZN", "Amazon.com Inc."),
-        "nvda": ("NVDA", "NVIDIA Corporation"),
-        "tsla": ("TSLA", "Tesla Inc."),
-        "meta": ("META", "Meta Platforms Inc."),
-        "google": ("GOOGL", "Alphabet Inc."),
-        "apple": ("AAPL", "Apple Inc."),
-        "microsoft": ("MSFT", "Microsoft Corporation"),
-    }
+@router.get("/{market}/scan")
+async def scan_market(market: str, top_n: int = Query(50, ge=10, le=200)):
+    """Scan market for top stocks by activity.
 
-    results = []
-    for key, (symbol, name) in us_stocks.items():
-        if query in key or query in symbol.lower() or query in name.lower():
-            results.append(StockSearchResult(
-                symbol=symbol,
-                name=name,
-                market="us",
-                exchange="NASDAQ/NYSE",
-            ))
-            if len(results) >= limit:
-                break
+    Args:
+        market: Market to scan (us/hk/cn)
+        top_n: Number of top stocks to return
 
-    return results
+    Returns:
+        List of top active stocks
+    """
+    if market not in MARKET_CONFIG:
+        raise HTTPException(status_code=404, detail=f"Market '{market}' not found")
 
+    if market == "cn":
+        # Only CN market supports real-time scanning via akshare
+        stocks = await scan_popular_cn_stocks()
+        return {
+            "market": market,
+            "timestamp": __import__('datetime').datetime.now().isoformat(),
+            "stocks": stocks[:top_n],
+        }
+    else:
+        # For US/HK, return popular stocks list
+        if market == "us":
+            stocks = await scan_popular_us_stocks()
+        else:
+            stocks = await scan_popular_hk_stocks()
 
-def _search_hk_stocks(query: str, limit: int) -> list[StockSearchResult]:
-    """Search Hong Kong stocks."""
-    hk_stocks = {
-        "0700": ("0700.HK", "腾讯控股"),
-        "9988": ("9988.HK", "阿里巴巴"),
-        "3690": ("3690.HK", "美团"),
-        "1810": ("1810.HK", "小米集团"),
-        "腾讯": ("0700.HK", "腾讯控股"),
-        "阿里": ("9988.HK", "阿里巴巴"),
-        "美团": ("3690.HK", "美团"),
-        "小米": ("1810.HK", "小米集团"),
-    }
-
-    results = []
-    for key, (symbol, name) in hk_stocks.items():
-        if query in key or query in name:
-            results.append(StockSearchResult(
-                symbol=symbol,
-                name=name,
-                market="hk",
-                exchange="HKEX",
-            ))
-            if len(results) >= limit:
-                break
-
-    return results
-
-
-def _search_cn_stocks(query: str, limit: int) -> list[StockSearchResult]:
-    """Search Chinese A-share stocks."""
-    cn_stocks = {
-        "600519": ("600519.SH", "贵州茅台"),
-        "000858": ("000858.SZ", "五粮液"),
-        "601318": ("601318.SH", "中国平安"),
-        "600036": ("600036.SH", "招商银行"),
-        "茅台": ("600519.SH", "贵州茅台"),
-        "五粮液": ("000858.SZ", "五粮液"),
-        "平安": ("601318.SH", "中国平安"),
-        "招行": ("600036.SH", "招商银行"),
-    }
-
-    results = []
-    for key, (symbol, name) in cn_stocks.items():
-        if query in key or query in name:
-            results.append(StockSearchResult(
-                symbol=symbol,
-                name=name,
-                market="cn",
-                exchange="SSE/SZSE",
-            ))
-            if len(results) >= limit:
-                break
-
-    return results
+        return {
+            "market": market,
+            "timestamp": __import__('datetime').datetime.now().isoformat(),
+            "stocks": stocks[:top_n],
+            "note": "Pre-defined popular stocks list. Real-time scanning available for CN market only.",
+        }

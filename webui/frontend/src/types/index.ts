@@ -80,14 +80,27 @@ export type AnalystType = 'market' | 'social' | 'news' | 'fundamentals'
 export type AnalysisStatusType = 'pending' | 'running' | 'completed' | 'failed'
 
 export interface AnalysisRequest {
+  // Basic settings
   ticker: string
   market: MarketType
   analysts: AnalystType[]
   analysis_date?: string
-  research_depth: number
+  // Research depth settings
+  research_depth?: number
+  max_debate_rounds?: number
+  max_risk_discuss_rounds?: number
+  // LLM configuration
   llm_provider: string
   shallow_model: string
   deep_model: string
+  temperature?: number
+  openai_reasoning_effort?: string
+  google_thinking_level?: string
+  // Data vendor settings
+  data_vendor?: string
+  // Agent swarm settings
+  enable_bull_bear_debate?: boolean
+  enable_risk_analysis?: boolean
 }
 
 export interface AgentStatus {

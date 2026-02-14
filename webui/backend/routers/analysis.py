@@ -14,6 +14,7 @@ from ..schemas.analysis import (
     AnalysisStatusEnum,
     AgentStatus,
     AnalysisReport,
+    AnalysisConfig,
 )
 from ..services.analysis_service import AnalysisService
 
@@ -22,6 +23,12 @@ router = APIRouter()
 # In-memory task storage (use Redis in production)
 _tasks: dict[str, AnalysisStatus] = {}
 _reports: dict[str, AnalysisReport] = {}
+
+
+@router.get("/config", response_model=AnalysisConfig)
+async def get_analysis_config() -> AnalysisConfig:
+    """Get analysis configuration options and presets."""
+    return AnalysisConfig()
 
 
 @router.post("/start", response_model=dict[str, str])
