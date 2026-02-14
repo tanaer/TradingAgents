@@ -1,8 +1,14 @@
 """FastAPI application entry point for TradingAgents WebUI."""
 
+import sys
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Allow running directly
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from .config import get_settings
 from .routers import providers, analysis, markets, websocket
