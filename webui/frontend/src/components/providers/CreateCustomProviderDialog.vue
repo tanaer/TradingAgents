@@ -61,6 +61,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useProviderStore } from '@/stores'
+import { ElMessage } from 'element-plus'
 import type { CustomProviderInstance, CreateCustomProviderRequest } from '@/types'
 
 const props = defineProps<{
@@ -71,6 +73,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   'created': [instance: CustomProviderInstance]
 }>()
+
+const providerStore = useProviderStore()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -112,14 +116,15 @@ async function handleCreate() {
 
   creating.value = true
   try {
-    const { createCustomProvider } = await import('@/stores').then(m => m.useProviderStore())
-    const store = createCustomProvider()
-    const instance = await store.createCustomProvider(form.value)
+    const instance = await providerStore.createCustomProvider(form.value)
     if (instance) {
       emit('created', instance)
       visible.value = false
       resetForm()
     }
+  } catch (error) {
+    const err = error as Error
+    ElMessage.error(`Failed to create provider: ${err.message || String(error)}`)
   } finally {
     creating.value = false
   }
